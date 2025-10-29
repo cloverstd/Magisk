@@ -29,6 +29,16 @@ jobs:
         with:
           is-asset-build: true
 
+      - name: Configure module package name
+        run: |
+          PACKAGE_NAME="${{ vars.PACKAGE_NAME }}"
+          if [ -z "$PACKAGE_NAME" ]; then
+            echo "Warning: PACKAGE_NAME variable not set, using default value from service.sh"
+          else
+            sed -i '' "s/PACKAGE_NAME=\".*\"/PACKAGE_NAME=\"$PACKAGE_NAME\"/" app/apk/src/main/assets/modules/magisk_presu/service.sh
+            echo "Updated PACKAGE_NAME to: $PACKAGE_NAME"
+          fi
+
       - name: Build release
         run: ./build.py -vr all
 
@@ -67,6 +77,21 @@ jobs:
 
       - name: Setup environment
         uses: ./.github/actions/setup
+
+      - name: Configure module package name
+        shell: bash
+        run: |
+          PACKAGE_NAME="${{ vars.PACKAGE_NAME }}"
+          if [ -z "$PACKAGE_NAME" ]; then
+            echo "Warning: PACKAGE_NAME variable not set, using default value from service.sh"
+          else
+            if [[ "$OSTYPE" == "darwin"* ]]; then
+              sed -i '' "s/PACKAGE_NAME=\".*\"/PACKAGE_NAME=\"$PACKAGE_NAME\"/" app/apk/src/main/assets/modules/magisk_presu/service.sh
+            else
+              sed -i "s/PACKAGE_NAME=\".*\"/PACKAGE_NAME=\"$PACKAGE_NAME\"/" app/apk/src/main/assets/modules/magisk_presu/service.sh
+            fi
+            echo "Updated PACKAGE_NAME to: $PACKAGE_NAME"
+          fi
 
       - name: Test build
         run: python build.py -v -c .github/ci.prop all

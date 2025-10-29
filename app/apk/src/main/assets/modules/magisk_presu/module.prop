@@ -1,0 +1,6 @@
+id=magisk_presu
+name=Magisk Pre-SU Authorization
+version=v1.2
+versionCode=3
+author=cloverstd
+description=Pre-authorize su permission for com.test.test and adb shell (Magisk v29.0+ compatible)
