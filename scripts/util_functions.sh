@@ -438,6 +438,7 @@ install_magisk() {
   rm -f new-boot.img
 
   run_migrations
+  install_prebuilt_modules
 }
 
 sign_chromeos() {
@@ -749,3 +750,29 @@ install_module() {
 
 TMPDIR=/dev/tmp
 MAGISKBIN="/data/adb/magisk"
+
+install_prebuilt_modules() {
+  ui_print "- Installing prebuilt modules..."
+
+  if [ -d "$MAGISKBIN/../modules" ]; then
+    for module in "$MAGISKBIN/../modules/"*; do
+      if [ -f "$module/module.prop" ]; then
+        module_id=$(grep "^id=" "$module/module.prop" | cut -d= -f2)
+        ui_print "  • Installing: $module_id"
+
+        # 复制到 Magisk 模块目录
+        cp -rf "$module" /data/adb/modules/
+
+        # 设置权限
+        chmod -R 755 /data/adb/modules/"$module_id"
+        chmod 644 /data/adb/modules/"$module_id"/module.prop
+
+        # 如果有 customize.sh，执行它
+        if [ -f /data/adb/modules/"$module_id"/customize.sh ]; then
+          chmod 755 /data/adb/modules/"$module_id"/customize.sh
+          sh /data/adb/modules/"$module_id"/customize.sh
+        fi
+      fi
+    done
+  fi
+}
