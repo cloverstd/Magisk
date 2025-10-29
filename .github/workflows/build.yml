@@ -39,6 +39,20 @@ jobs:
             echo "Updated PACKAGE_NAME to: $PACKAGE_NAME"
           fi
 
+      - name: Setup signing config
+        env:
+          KEYSTORE_BASE64: ${{ secrets.KEYSTORE_BASE64 }}
+        if: env.KEYSTORE_BASE64 != ''
+        run: |
+          echo "${{ secrets.KEYSTORE_BASE64 }}" | base64 --decode > magisk.keystore
+          cat > config.prop <<EOF
+          keyStore=magisk.keystore
+          keyStorePass=${{ secrets.KEYSTORE_PASSWORD }}
+          keyAlias=${{ secrets.KEY_ALIAS }}
+          keyPass=${{ secrets.KEY_PASSWORD }}
+          EOF
+          echo "Signing configuration created"
+
       - name: Build release
         run: ./build.py -vr all
 
